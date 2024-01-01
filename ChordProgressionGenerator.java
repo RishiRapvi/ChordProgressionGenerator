@@ -38,6 +38,10 @@ public class ChordProgressionGenerator {
         }
     }
 
+    public static String[] getAllChordNames() {
+        return new String[]{"C_MAJOR", "D_MINOR", "E_MINOR", "F_MAJOR", "G_MAJOR", "A_MINOR", "B_DIMINISHED"};
+    }
+
     private static List<Integer> getChordNotes(String chordName) {
         switch (chordName) {
             case "C_MAJOR":

@@ -15,7 +15,7 @@ public class Main {
             int numChords = scanner.nextInt();
             scanner.nextLine(); // Consume the newline character
 
-            System.out.println("Available chords: C_MAJOR, D_MINOR, ...");
+            System.out.println("Available chords: " + Arrays.toString(ChordProgressionGenerator.getAllChordNames()));
             System.out.println("Enter the chords for the progression separated by spaces:");
             List<String> userChordProgression = Arrays.asList(scanner.nextLine().trim().split("\\s+"));
 
