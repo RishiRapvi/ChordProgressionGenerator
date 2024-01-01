@@ -3,14 +3,20 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ChordProgressionGenerator {
-    public static void generateMIDI(Sequence sequence, List<String> chordProgression, int numberOfBeats, int notesPerChord, int ticksPerBeat) throws InvalidMidiDataException {
+    public static void generateMIDI(Sequence sequence, List<String> chordProgression, int numberOfBeats, int notesPerChord, int ticksPerBeat, List<String> chordsInSameBeat) throws InvalidMidiDataException {
         Track track = sequence.createTrack();
 
         int currentChordIndex = 0;
 
+
         for (int beat = 0; beat < numberOfBeats; beat++) {
             for (int i = 0; i < notesPerChord; i++) {
-                String currentChord = chordProgression.get(currentChordIndex);
+                String currentChord;
+                if (i < chordsInSameBeat.size()) {
+                    currentChord = chordsInSameBeat.get(i);
+                } else {
+                    currentChord = chordProgression.get(currentChordIndex);
+                }
 
                 // Directly including the chords without ellipses
                 List<Integer> currentChordNotes = getChordNotes(currentChord);
@@ -23,6 +29,8 @@ public class ChordProgressionGenerator {
                     ShortMessage noteOff = new ShortMessage();
                     noteOff.setMessage(ShortMessage.NOTE_OFF, 0, note, 64);
                     track.add(new MidiEvent(noteOff, (beat * notesPerChord + i + 1) * ticksPerBeat)); // Duration: 1/n of a beat
+
+
                 }
             }
 

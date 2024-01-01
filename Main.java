@@ -1,5 +1,4 @@
 import javax.sound.midi.*;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -16,16 +15,13 @@ public class Main {
             int numChords = scanner.nextInt();
             scanner.nextLine(); // Consume the newline character
 
-            System.out.println("Available chords: C_MAJOR, D_MINOR");
+            System.out.println("Available chords: C_MAJOR, D_MINOR, ...");
             System.out.println("Enter the chords for the progression separated by spaces:");
             List<String> userChordProgression = Arrays.asList(scanner.nextLine().trim().split("\\s+"));
 
-            // Allow the user to specify if they want multiple chords in the same beat
-            System.out.print("Do you want multiple chords in the same beat? (y/n): ");
-            boolean multipleChordsInSameBeat = scanner.nextLine().equalsIgnoreCase("y");
-
-            // Adjust the number of notes per chord based on user input
-            int notesPerChord = multipleChordsInSameBeat ? 2 : 4;
+            // Allow the user to specify chords in the same beat
+            System.out.print("Enter the chords you want in the same beat (separated by spaces), or leave blank for default: ");
+            List<String> chordsInSameBeat = Arrays.asList(scanner.nextLine().trim().split("\\s+"));
 
             // Create a Sequencer
             Sequencer sequencer = MidiSystem.getSequencer();
@@ -35,7 +31,8 @@ public class Main {
             Sequence sequence = new Sequence(Sequence.PPQ, 480); // Specify the division type and resolution
 
             // Continue with MIDI generation
-            ChordProgressionGenerator.generateMIDI(sequence, userChordProgression, numChords, notesPerChord, 480);
+            int notesPerChord = chordsInSameBeat.isEmpty() ? 4 : chordsInSameBeat.size();
+            ChordProgressionGenerator.generateMIDI(sequence, userChordProgression, numChords, notesPerChord, 480, chordsInSameBeat);
 
             // Set the sequence for the sequencer
             sequencer.setSequence(sequence);
@@ -43,10 +40,17 @@ public class Main {
             // Start playing
             sequencer.start();
 
+            // Allow some time for the sequencer to play (you can adjust this)
+            Thread.sleep(5000); // Sleep for 5 seconds
+
+            // Stop and close the sequencer
+            sequencer.stop();
+            sequencer.close();
+
             // Close the scanner
             scanner.close();
 
-        } catch (MidiUnavailableException | InvalidMidiDataException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
