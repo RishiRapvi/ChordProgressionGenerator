@@ -33,7 +33,6 @@ public class ChordProgressionGenerator {
 
                 }
             }
-
             currentChordIndex = (currentChordIndex + 1) % chordProgression.size();
         }
     }
@@ -61,5 +60,6 @@ public class ChordProgressionGenerator {
             default:
                 return Arrays.asList(); // Handle unknown chords
         }
+
     }
 }

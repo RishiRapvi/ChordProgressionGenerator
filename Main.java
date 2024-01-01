@@ -34,13 +34,19 @@ public class Main {
             int notesPerChord = chordsInSameBeat.isEmpty() ? 4 : chordsInSameBeat.size();
             ChordProgressionGenerator.generateMIDI(sequence, userChordProgression, numChords, notesPerChord, 480, chordsInSameBeat);
 
+            // Specify the output file name and write the MIDI sequence to a file
+            String fileName = "output.mid";
+            MidiSystem.write(sequence, 1, new java.io.File(fileName));
+
+            System.out.println("MIDI file saved: " + fileName);
+
             // Set the sequence for the sequencer
             sequencer.setSequence(sequence);
 
             // Start playing
             sequencer.start();
 
-            // Allow some time for the sequencer to play (you can adjust this)
+            // Allow some time for the sequencer to play
             Thread.sleep(5000); // Sleep for 5 seconds
 
             // Stop and close the sequencer
