@@ -3,22 +3,24 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ChordProgressionGenerator {
-    public static void generateMIDI(Sequence sequence, List<String> chordProgression, int numberOfBeats, int notesPerChord, int ticksPerBeat, List<String> chordsInSameBeat) throws InvalidMidiDataException {
+    public static void generateMIDI(Sequence sequence, List<List<String>> chordProgression, int ticksPerBeat, List<String> chordsInSameBeat) throws InvalidMidiDataException {
         Track track = sequence.createTrack();
 
-        int currentChordIndex = 0;
+        for (int beat = 0; beat < chordProgression.size(); beat++) {
+            List<String> chordsForBeat = chordProgression.get(beat);
+            int notesPerChord = chordsForBeat.size();
 
-
-        for (int beat = 0; beat < numberOfBeats; beat++) {
             for (int i = 0; i < notesPerChord; i++) {
                 String currentChord;
-                if (i < chordsInSameBeat.size()) {
-                    currentChord = chordsInSameBeat.get(i);
+                if (chordsInSameBeat != null && !chordsInSameBeat.isEmpty()) {
+                    int indexInSameBeat = i % chordsInSameBeat.size();
+                    currentChord = chordsInSameBeat.get(indexInSameBeat);
                 } else {
-                    currentChord = chordProgression.get(currentChordIndex);
+                    currentChord = chordsForBeat.get(i);
                 }
 
-                // Directly including the chords without ellipses
+                System.out.println("Processing beat " + (beat + 1) + ", chord " + (i + 1) + ": " + currentChord);
+
                 List<Integer> currentChordNotes = getChordNotes(currentChord);
 
                 for (int note : currentChordNotes) {
@@ -29,16 +31,30 @@ public class ChordProgressionGenerator {
                     ShortMessage noteOff = new ShortMessage();
                     noteOff.setMessage(ShortMessage.NOTE_OFF, 0, note, 64);
                     track.add(new MidiEvent(noteOff, (beat * notesPerChord + i + 1) * ticksPerBeat)); // Duration: 1/n of a beat
-
-
                 }
             }
-            currentChordIndex = (currentChordIndex + 1) % chordProgression.size();
         }
-    }
 
-    public static String[] getAllChordNames() {
-        return new String[]{"C_MAJOR", "D_MINOR", "E_MINOR", "F_MAJOR", "G_MAJOR", "A_MINOR", "B_DIMINISHED"};
+        // New code to play the MIDI file using Synthesizer
+        try {
+            Sequencer sequencer = MidiSystem.getSequencer();
+            sequencer.open();
+            sequencer.setSequence(sequence);
+
+            Synthesizer synthesizer = MidiSystem.getSynthesizer();
+            synthesizer.open();
+            synthesizer.loadAllInstruments(synthesizer.getDefaultSoundbank());
+
+            Receiver receiver = synthesizer.getReceiver();
+            Transmitter transmitter = sequencer.getTransmitter();
+            transmitter.setReceiver(receiver);
+
+            sequencer.start();
+            Thread.sleep(5000); // Sleep for 5 seconds
+            sequencer.close();
+        } catch (MidiUnavailableException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static List<Integer> getChordNotes(String chordName) {
@@ -60,6 +76,9 @@ public class ChordProgressionGenerator {
             default:
                 return Arrays.asList(); // Handle unknown chords
         }
+    }
 
+    public static List<String> getAllChordNames() {
+        return Arrays.asList("C_MAJOR", "D_MINOR", "E_MINOR", "F_MAJOR", "G_MAJOR", "A_MINOR", "B_DIMINISHED");
     }
 }
