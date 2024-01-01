@@ -1,57 +1,53 @@
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiUnavailableException;
-import java.io.IOException;
+import javax.sound.midi.*;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    static final List<Integer> C_MAJOR = Arrays.asList(60, 64, 67);
-    static final List<Integer> D_MINOR = Arrays.asList(62, 65, 69);
-    // ... other chord definitions ...
+    public static void main(String[] args) {
+        try {
+            Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) throws MidiUnavailableException, InvalidMidiDataException, IOException {
-        Scanner scanner = new Scanner(System.in);
+            System.out.println("Welcome to the Chord Progression Generator!");
 
-        System.out.println("Welcome to the Chord Progression Generator!");
+            // Allow the user to customize the chord progression
+            System.out.print("Enter the number of chords in the progression: ");
+            int numChords = scanner.nextInt();
+            scanner.nextLine(); // Consume the newline character
 
-        // Allow the user to customize the chord progression
-        System.out.print("Enter the number of chords in the progression: ");
-        int numChords = scanner.nextInt();
-        scanner.nextLine(); // Consume the newline character
+            System.out.println("Available chords: C_MAJOR, D_MINOR");
+            System.out.println("Enter the chords for the progression separated by spaces:");
+            List<String> userChordProgression = Arrays.asList(scanner.nextLine().trim().split("\\s+"));
 
-        System.out.println("Available chords: C_MAJOR, D_MINOR, ect.");
-        System.out.println("Enter the chords for the progression separated by spaces: (Type in all caps, such as C_MAJOR with no commas)");
+            // Allow the user to specify if they want multiple chords in the same beat
+            System.out.print("Do you want multiple chords in the same beat? (y/n): ");
+            boolean multipleChordsInSameBeat = scanner.nextLine().equalsIgnoreCase("y");
 
-        // Read user input for the chord progression
-        List<String> userChordProgression = Arrays.asList(scanner.nextLine().trim().split("\\s+"));
+            // Adjust the number of notes per chord based on user input
+            int notesPerChord = multipleChordsInSameBeat ? 2 : 4;
 
-        // Validate user input
-        if (isValidChordProgression(userChordProgression)) {
-            System.out.println("Generating MIDI for the custom chord progression...");
-            ChordProgressionGenerator.chordsToMIDI(userChordProgression, "custom_output.mid");
-        } else {
-            System.out.println("Invalid chord progression. Exiting.");
+            // Create a Sequencer
+            Sequencer sequencer = MidiSystem.getSequencer();
+            sequencer.open();
+
+            // Create a Sequence
+            Sequence sequence = new Sequence(Sequence.PPQ, 480); // Specify the division type and resolution
+
+            // Continue with MIDI generation
+            ChordProgressionGenerator.generateMIDI(sequence, userChordProgression, numChords, notesPerChord, 480);
+
+            // Set the sequence for the sequencer
+            sequencer.setSequence(sequence);
+
+            // Start playing
+            sequencer.start();
+
+            // Close the scanner
+            scanner.close();
+
+        } catch (MidiUnavailableException | InvalidMidiDataException e) {
+            e.printStackTrace();
         }
-
-        // Close the scanner
-        scanner.close();
     }
-
-    static boolean isValidChordProgression(List<String> chords) {
-        for (String chord : chords) {
-            if (!isValidChord(chord)) {
-                System.out.println("Invalid chord: " + chord);
-                return false;
-            }
-        }
-        return true;
-    }
-    static boolean isValidChord(String chord) {
-        return chord.equals("C_MAJOR") || chord.equals("D_MINOR") ||
-                chord.equals("E_MINOR") || chord.equals("F_MAJOR") ||
-                chord.equals("G_MAJOR") || chord.equals("A_MINOR") ||
-                chord.equals("B_DIMINISHED");
-    }
-
 }
