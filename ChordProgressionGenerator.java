@@ -35,19 +35,11 @@ public class ChordProgressionGenerator {
             }
         }
 
-        // New code to play the MIDI file using Synthesizer
+        // New code to play the MIDI file using the default synthesizer
         try {
             Sequencer sequencer = MidiSystem.getSequencer();
             sequencer.open();
             sequencer.setSequence(sequence);
-
-            Synthesizer synthesizer = MidiSystem.getSynthesizer();
-            synthesizer.open();
-            synthesizer.loadAllInstruments(synthesizer.getDefaultSoundbank());
-
-            Receiver receiver = synthesizer.getReceiver();
-            Transmitter transmitter = sequencer.getTransmitter();
-            transmitter.setReceiver(receiver);
 
             sequencer.start();
             Thread.sleep(5000); // Sleep for 5 seconds
